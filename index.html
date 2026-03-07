@@ -2,42 +2,69 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mi reproductor de video</title>
+<title>Acceso privado</title>
 
 <style>
 body{
-    margin:0;
     background:#0f0f0f;
     color:white;
-    font-family:Arial, Helvetica, sans-serif;
+    font-family:Arial;
     display:flex;
     justify-content:center;
     align-items:center;
     height:100vh;
 }
 
-.container{
+#loginBox{
     text-align:center;
 }
 
-video{
-    width:80%;
-    max-width:900px;
-    border-radius:10px;
-    box-shadow:0 0 20px rgba(0,0,0,0.6);
+input{
+    padding:10px;
+    margin:5px;
+}
+
+button{
+    padding:10px 20px;
 }
 </style>
 
+<script>
+function checkPassword(){
+
+let user = document.getElementById("user").value;
+let pass = document.getElementById("pass").value;
+
+if(user === "admin" && pass === "1234"){
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("videoPage").style.display="block";
+}else{
+    alert("Usuario o contraseña incorrectos");
+}
+
+}
+</script>
+
 </head>
+
 <body>
 
-<div class="container">
-<h1>Reproductor de video</h1>
+<div id="loginBox">
+<h2>Acceso privado</h2>
 
-<video controls>
-    <source src="video.mp4" type="video/mp4">
-    Tu navegador no soporta video HTML5.
+<input id="user" placeholder="Usuario"><br>
+<input id="pass" type="password" placeholder="Contraseña"><br>
+
+<button onclick="checkPassword()">Entrar</button>
+</div>
+
+
+<div id="videoPage" style="display:none; text-align:center;">
+
+<h1>Video privado</h1>
+
+<video width="900" controls>
+<source src="video.mp4" type="video/mp4">
 </video>
 
 </div>
