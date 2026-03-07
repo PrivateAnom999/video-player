@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi reproductor de video</title>
+
+<style>
+body{
+    margin:0;
+    background:#0f0f0f;
+    color:white;
+    font-family:Arial, Helvetica, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.container{
+    text-align:center;
+}
+
+video{
+    width:80%;
+    max-width:900px;
+    border-radius:10px;
+    box-shadow:0 0 20px rgba(0,0,0,0.6);
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+<h1>Reproductor de video</h1>
+
+<video controls>
+    <source src="video.mp4" type="video/mp4">
+    Tu navegador no soporta video HTML5.
+</video>
+
+</div>
+
+</body>
+</html>
