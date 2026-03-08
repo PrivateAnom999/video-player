@@ -160,8 +160,8 @@ video{width:95%; max-width:1100px; max-height:80vh; border-radius:10px; backgrou
   }
   updateLeftRotation(0);
 
-  // Login
-  btnEnter.addEventListener('click',function(){
+  // Función de login
+  function tryLogin(){
     const u=userEl.value.trim();
     const p=passEl.value;
     userError.style.display='none';
@@ -180,6 +180,16 @@ video{width:95%; max-width:1100px; max-height:80vh; border-radius:10px; backgrou
       return;
     }
     alert('Usuario o contraseña incorrectos');
+  }
+
+  // Botón Entrar
+  btnEnter.addEventListener('click', tryLogin);
+
+  // Enter en campos de login
+  [userEl, passEl].forEach(input=>{
+    input.addEventListener('keydown', function(e){
+      if(e.key==='Enter'){ e.preventDefault(); tryLogin(); }
+    });
   });
 
   // Rotación puzzle
