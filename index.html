@@ -16,10 +16,11 @@
   --text: #ffffff;
 }
 
+/* RESET & BASE */
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif; overflow:hidden}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
 
-/* Layout centrado */
+/* Layout centrado general */
 .app {
   min-height:100vh;
   display:flex;
@@ -28,15 +29,19 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-famil
   padding:20px;
 }
 
+/* Layout fila para pantallas anchas (login + video) */
+.layout-row{ width:100%; max-width:1300px; display:block; }
+
 /* Caja de login */
 .container{
   width:90%;
   max-width:var(--card-max);
   background:var(--panel);
-  padding:26px;
+  padding:22px;
   border-radius:12px;
   box-shadow:0 6px 30px rgba(0,0,0,0.6);
   text-align:center;
+  margin:0 auto;
 }
 
 /* Inputs */
@@ -47,6 +52,8 @@ input{
   border:none;
   border-radius:8px;
   font-size:16px;
+  background:#fff;
+  color:#000;
 }
 
 /* Button */
@@ -63,12 +70,14 @@ button{
 }
 button:hover{filter:brightness(.95)}
 
-/* Error messages under login inputs */
+/* Error messages: VISIBLE desde el principio */
 .error-msg{
   font-size:14px;
   color:#ff6b6b;
-  margin-top:2px;
-  display:block;
+  margin-top:4px;
+  display:block;            /* <-- visible desde el inicio */
+  min-height:18px;
+  opacity:0.95;
 }
 
 /* Video page */
@@ -77,6 +86,7 @@ button:hover{filter:brightness(.95)}
   width:95%;
   max-width:var(--video-max);
   text-align:center;
+  margin:0 auto;
 }
 video{
   width:100%;
@@ -86,34 +96,72 @@ video{
   background:black;
 }
 
-/* Puzzle page (fondo cuadriculado toda la pantalla) */
+/* PUZZLE PAGE: cubre toda la ventana y fondo cuadriculado */
 #puzzlePage{
   display:none;
-  width:100%;
-  height:100vh;
-  position:relative;
+  position:fixed;
+  inset:0;
+  z-index:30;
+  background-color:var(--bg);
   background-image:
     linear-gradient(90deg, #fff 50%, #000 50%),
     linear-gradient(90deg, #000 50%, #fff 50%);
   background-size: calc(var(--bg-size) * 2) calc(var(--bg-size) * 2);
   background-position: 0 0, var(--bg-size) 0;
   display:flex;
-  flex-direction:column;
   align-items:center;
   justify-content:center;
+  padding:20px;
+  overflow:hidden; /* evita scroll */
 }
 
-/* Images area */
+/* Contenido del puzzle centrado y con límites para que TODO quepa en pantalla */
+.puzzle-content{
+  position:relative;
+  width:min(1100px,94%);
+  height:min(820px,94vh); /* garantiza que quepa en pantalla grande sin scroll */
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  gap:12px;
+  padding:16px;
+  background:rgba(28,28,28,0.85);
+  border-radius:12px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.6);
+  overflow:hidden;
+}
+
+/* Corner overlays (negros) - se colocan respecto al viewport */
+.corner {
+  position:absolute;
+  width:var(--corner-size);
+  height:var(--corner-size);
+  background:black;
+  z-index:5;
+  pointer-events:auto;
+}
+.corner.top-left{ top:0; left:0; cursor:pointer; }
+.corner.top-right{ top:0; right:0; cursor:pointer; }
+.corner.bottom-right{ bottom:0; right:0; }
+.corner.bottom-left{ bottom:0; left:0; cursor:pointer; }
+
+/* Área donde se muestran las dos "imágenes" y las controla */
 .images {
   display:flex;
   gap:18px;
   align-items:center;
   justify-content:center;
-  margin:18px 0;
+  margin:6px 0;
+  flex-wrap:nowrap;
+  width:100%;
+  flex:0 0 auto;
 }
+
+/* Caja de cada imagen: su tamaño se adapta para no exceder la altura disponible */
 .img-box{
-  width: clamp(120px,22vw,320px);
-  height: clamp(120px,22vw,320px);
+  width: clamp(140px, 30vw, 420px);
+  height: clamp(140px, 30vh, 420px);
   background:#ddd;
   border-radius:8px;
   display:flex;
@@ -124,234 +172,303 @@ video{
   overflow:hidden;
 }
 .img-box svg{ width:90%; height:90% }
+
+/* Right image fixed rotation */
 #rightImg svg{ transform: rotate(30deg); transition: transform .2s linear }
+/* Left image rotated by slider */
 #leftImg svg{ transition: transform .1s linear }
 
-/* Controls */
-.controls{ width:90%; max-width:700px; text-align:center; margin-bottom:12px; color:#fff }
-.controls input[type="range"]{ width:100%; margin-top:8px }
-
-/* Attempt message */
-.attempts{ margin-top:8px; font-weight:600 }
-
-/* Corner overlays for puzzle */
-.corner {
-  position:absolute;
-  width:var(--corner-size);
-  height:var(--corner-size);
-  background:black;
-  z-index:5;
-}
-.corner.top-left{top:0;left:0; cursor:pointer}
-.corner.top-right{top:0;right:0; cursor:pointer}
-.corner.bottom-right{bottom:0;right:0}
-.corner.bottom-left{bottom:0;left:0; cursor:pointer}
-
-/* Locked overlay */
-.locked-overlay{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,0.85);
-  color:white;
+/* Controls: rango y botón ocupan el ancho, con tamaños que caben en pantalla */
+.controls{
+  width:100%;
+  max-width:820px;
+  text-align:center;
+  color:#fff;
   display:flex;
+  flex-direction:column;
+  gap:8px;
   align-items:center;
   justify-content:center;
-  z-index:40;
+}
+.controls input[type="range"]{ width:100%; margin-top:4px }
+
+/* Mensajes e intentos */
+.attempts{ margin-top:6px; font-weight:600 }
+.small{ font-size:14px; color:#ddd; }
+
+/* Overlay bloqueado cuando se agotan intentos */
+.locked-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.88);
+  color:white;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:60;
   font-size:18px;
   padding:20px;
   text-align:center;
 }
 
-/* small helpers */
-.small{ font-size:14px; color:#ddd }
-.hint{ font-size:13px; color:#cfcfcf; margin-top:6px }
-
+/* ADAPTACIONES para pantallas anchas: mostrar login y video lado a lado */
 @media(min-width:1000px){
-  .app{padding:40px}
   .layout-row{
     display:flex;
     gap:24px;
     align-items:flex-start;
     justify-content:center;
-    width:100%;
   }
-  .container{ flex:0 0 380px; }
-  #videoPage{ flex:1 }
+  .container{ flex:0 0 380px; margin:0 }
+  #videoPage{ flex:1; margin:0 }
+  .puzzle-content{ height:min(740px,86vh); }
+  .img-box{ height: clamp(160px, 28vh, 420px); }
 }
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="layout-row" style="width:100%;max-width:1300px;">
+  <div class="app">
+    <div class="layout-row">
 
-    <!-- LOGIN -->
-    <div id="loginBox" class="container" aria-live="polite">
-      <h2 style="margin:0 0 10px 0">Acceso privado</h2>
-      <input id="user" placeholder="Usuario" autocomplete="off" />
-      <div id="userError" class="error-msg">El usuario no puede estar vacio</div>
-      <input id="pass" type="password" placeholder="Contraseña" autocomplete="new-password" />
-      <div id="passError" class="error-msg">La contraseña no puede estar vacio</div>
-      <button id="btnEnter">Entrar</button>
-    </div>
+      <!-- LOGIN -->
+      <div id="loginBox" class="container" aria-live="polite">
+        <h2 style="margin:0 0 10px 0">Acceso privado</h2>
 
-    <!-- VIDEO (oculto inicialmente) -->
-    <div id="videoPage">
-      <h2 style="margin:0 0 6px 0">Video privado</h2>
-      <div class="small">Reproduciendo desde el repositorio</div>
-      <video id="mainVideo" controls controlsList="nodownload" preload="metadata">
-        <source src="video.mp4" type="video/mp4">
-        Tu navegador no soporta video.
-      </video>
-    </div>
+        <input id="user" placeholder="Usuario" autocomplete="off" />
+        <div id="userError" class="error-msg">El usuario no puede estar vacio</div>
 
-  </div>
-</div>
+        <input id="pass" type="password" placeholder="Contraseña" autocomplete="new-password" />
+        <div id="passError" class="error-msg">La contraseña no puede estar vacio</div>
 
-<!-- PUZZLE PAGE -->
-<div id="puzzlePage">
-  <div class="corner top-left" id="cornerTL"></div>
-  <div class="corner top-right" id="cornerTR"></div>
-  <div class="corner bottom-right" id="cornerBR"></div>
-  <div id="cornerBL" class="corner bottom-left"></div>
+        <button id="btnEnter">Entrar</button>
+      </div>
 
-  <h3>Verificación adicional requerida</h3>
-  <div class="small">Coloca la imagen izquierda al mismo ángulo que la de la derecha. Tienes 3 intentos.</div>
+      <!-- VIDEO (oculto inicialmente) -->
+      <div id="videoPage">
+        <h2 style="margin:0 0 6px 0">Video privado</h2>
+        <div class="small">Reproduciendo desde el repositorio</div>
+        <video id="mainVideo" controls controlsList="nodownload" preload="metadata">
+          <source src="video.mp4" type="video/mp4">
+          Tu navegador no soporta video.
+        </video>
+      </div>
 
-  <div class="images" aria-hidden="false">
-    <div id="leftImg" class="img-box">
-      <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
-        <g id="leftSVG" transform="rotate(0 50 50)">
-          <rect x="20" y="20" width="60" height="60" rx="8" ry="8" fill="#1e88e5"/>
-          <circle cx="50" cy="50" r="14" fill="#fff"/>
-        </g>
-      </svg>
-    </div>
-
-    <div id="rightImg" class="img-box">
-      <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
-        <g>
-          <rect x="20" y="20" width="60" height="60" rx="8" ry="8" fill="#1e88e5"/>
-          <circle cx="50" cy="50" r="14" fill="#fff"/>
-        </g>
-      </svg>
     </div>
   </div>
 
-  <div class="controls">
-    <label for="rotRange">Ángulo de la imagen izquierda: <span id="angleLabel">0°</span></label>
-    <input id="rotRange" type="range" min="0" max="359" value="0" />
-    <div style="height:8px"></div>
-    <button id="btnCheck">Comprobar</button>
-    <div class="attempts" id="attemptsMsg"></div>
-    <div class="attempts small">Intentos restantes: <span id="attemptsCount">3</span></div>
-  </div>
-</div>
+  <!-- PUZZLE PAGE (oculto inicialmente) -->
+  <div id="puzzlePage" aria-hidden="true">
+    <!-- esquinas negras (clicables las requeridas) -->
+    <div id="cornerTL" class="corner top-left" aria-hidden="false"></div>
+    <div id="cornerTR" class="corner top-right" aria-hidden="false"></div>
+    <div id="cornerBR" class="corner bottom-right" aria-hidden="false"></div>
+    <div id="cornerBL" class="corner bottom-left" aria-hidden="false"></div>
 
-<div id="lockedOverlay" class="locked-overlay" style="display:none">
-  <div>
-    <div style="font-size:20px; font-weight:700">Acceso bloqueado</div>
-    <div style="margin-top:8px">Has agotado los intentos.</div>
+    <div class="puzzle-content" role="dialog" aria-modal="true" aria-label="Verificación adicional">
+      <h3 style="margin:6px 0 0 0">Verificación adicional requerida</h3>
+      <div class="small">Coloca la imagen izquierda al mismo ángulo que la de la derecha. Tienes 3 intentos.</div>
+
+      <div class="images" aria-hidden="false">
+        <div id="leftImg" class="img-box" title="Gira esta imagen">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+            <g id="leftSVG" transform="rotate(0 50 50)">
+              <rect x="20" y="20" width="60" height="60" rx="8" ry="8" fill="#1e88e5"/>
+              <circle cx="50" cy="50" r="14" fill="#fff"/>
+            </g>
+          </svg>
+        </div>
+
+        <div id="rightImg" class="img-box" title="Referencia (fija)">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+            <g>
+              <rect x="20" y="20" width="60" height="60" rx="8" ry="8" fill="#1e88e5"/>
+              <circle cx="50" cy="50" r="14" fill="#fff"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="controls">
+        <label for="rotRange">Ángulo de la imagen izquierda: <span id="angleLabel">0°</span></label>
+        <input id="rotRange" type="range" min="0" max="359" value="0" />
+        <div style="height:6px"></div>
+        <button id="btnCheck">Comprobar</button>
+        <div class="attempts" id="attemptsMsg"></div>
+        <div class="attempts small">Intentos restantes: <span id="attemptsCount">3</span></div>
+      </div>
+    </div>
   </div>
-</div>
+
+  <!-- Locked overlay -->
+  <div id="lockedOverlay" class="locked-overlay" role="alert">
+    <div>
+      <div style="font-size:20px; font-weight:700">Acceso bloqueado</div>
+      <div style="margin-top:8px">Has agotado los intentos.</div>
+    </div>
+  </div>
 
 <script>
 (function(){
-  const OK_USER="qp",OK_PASS="9q9q9p";
-  const userEl=document.getElementById('user');
-  const passEl=document.getElementById('pass');
-  const btnEnter=document.getElementById('btnEnter');
-  const loginBox=document.getElementById('loginBox');
-  const videoPage=document.getElementById('videoPage');
-  const puzzlePage=document.getElementById('puzzlePage');
-  const btnCheck=document.getElementById('btnCheck');
-  const rotRange=document.getElementById('rotRange');
-  const angleLabel=document.getElementById('angleLabel');
-  const leftSVG=document.getElementById('leftSVG');
-  const attemptsCountEl=document.getElementById('attemptsCount');
-  const attemptsMsg=document.getElementById('attemptsMsg');
-  const cornerBL=document.getElementById('cornerBL');
-  const cornerTL=document.getElementById('cornerTL');
-  const cornerTR=document.getElementById('cornerTR');
-  const lockedOverlay=document.getElementById('lockedOverlay');
-  const userError=document.getElementById('userError');
-  const passError=document.getElementById('passError');
+  // Credenciales "normales"
+  const OK_USER = "qp";
+  const OK_PASS = "9q9q9p";
 
-  let attemptsLeft=3;
-  attemptsCountEl.textContent=attemptsLeft;
-  let secretSequence=0;
+  // Elements
+  const userEl = document.getElementById('user');
+  const passEl = document.getElementById('pass');
+  const btnEnter = document.getElementById('btnEnter');
+  const loginBox = document.getElementById('loginBox');
+  const videoPage = document.getElementById('videoPage');
+  const puzzlePage = document.getElementById('puzzlePage');
+  const btnCheck = document.getElementById('btnCheck');
+  const rotRange = document.getElementById('rotRange');
+  const angleLabel = document.getElementById('angleLabel');
+  const leftSVG = document.getElementById('leftSVG');
+  const attemptsCountEl = document.getElementById('attemptsCount');
+  const attemptsMsg = document.getElementById('attemptsMsg');
+  const cornerBL = document.getElementById('cornerBL');
+  const cornerTL = document.getElementById('cornerTL');
+  const cornerTR = document.getElementById('cornerTR');
+  const lockedOverlay = document.getElementById('lockedOverlay');
+  const userError = document.getElementById('userError');
+  const passError = document.getElementById('passError');
 
+  // Puzzle state
+  let attemptsLeft = 3;
+  attemptsCountEl.textContent = attemptsLeft;
+  let secretSequence = 0; // expects 0 -> BL clicked, then 1 -> TR clicked
+
+  // Make error messages visible from the start (already visible via CSS),
+  // but keep their content as required — no further action needed.
+
+  // Update rotation visually
   function updateLeftRotation(deg){
-    leftSVG.setAttribute('transform','rotate('+deg+' 50 50)');
-    angleLabel.textContent=deg+'°';
+    leftSVG.setAttribute('transform', 'rotate(' + deg + ' 50 50)');
+    angleLabel.textContent = deg + '°';
   }
   updateLeftRotation(0);
 
-  btnEnter.addEventListener('click',function(){
-    const u=userEl.value.trim();
-    const p=passEl.value;
+  // Main login button behavior
+  btnEnter.addEventListener('click', function(){
+    const u = userEl.value.trim();
+    const p = passEl.value;
 
-    userError.style.display='block';
-    passError.style.display='block';
+    // Reset error displays (they are visible from start but we can highlight)
+    userError.style.opacity = 1;
+    passError.style.opacity = 1;
 
-    if(!u){ return; }
-    if(!p && u!=='00si'){ return; }
+    // Validate: show messages (they are visible already) and prevent login if empty
+    if(!u){
+      // user empty -> keep message and stop
+      userError.style.color = '#ff6b6b';
+      return;
+    } else {
+      userError.style.color = '#ff6b6b';
+    }
 
-    if(u==='00si' && p===''){
-      loginBox.style.display='none';
-      puzzlePage.style.display='flex';
-      attemptsLeft=3;
-      attemptsCountEl.textContent=attemptsLeft;
-      attemptsMsg.textContent='';
-      rotRange.value=0;
+    // If password empty and not the special backdoor path -> show message and stop
+    if(!p && u !== '00si'){
+      passError.style.color = '#ff6b6b';
+      return;
+    } else {
+      passError.style.color = '#ff6b6b';
+    }
+
+    // Secret puzzle entry: user == '00si' and password empty
+    if(u === '00si' && p === ''){
+      loginBox.style.display = 'none';
+      puzzlePage.style.display = 'flex';
+      puzzlePage.setAttribute('aria-hidden','false');
+      attemptsLeft = 3;
+      attemptsCountEl.textContent = attemptsLeft;
+      attemptsMsg.textContent = '';
+      rotRange.value = 0;
       updateLeftRotation(0);
-      lockedOverlay.style.display='none';
-      secretSequence=0;
+      lockedOverlay.style.display = 'none';
+      secretSequence = 0;
       return;
     }
 
-    if(u===OK_USER && p===OK_PASS){
-      loginBox.style.display='none';
-      puzzlePage.style.display='none';
-      videoPage.style.display='block';
-      const vid=document.getElementById('mainVideo');
-      vid.muted=false;
-      try{vid.play().catch(()=>{});}catch(e){}
+    // Normal valid credential
+    if(u === OK_USER && p === OK_PASS){
+      loginBox.style.display = 'none';
+      puzzlePage.style.display = 'none';
+      puzzlePage.setAttribute('aria-hidden','true');
+      videoPage.style.display = 'block';
+      // try to autoplay (may be blocked by browser)
+      const vid = document.getElementById('mainVideo');
+      vid.muted = false;
+      try{ vid.play().catch(()=>{}); }catch(e){}
       return;
     }
 
     alert('Usuario o contraseña incorrectos');
   });
 
-  rotRange.addEventListener('input',function(){
+  // Range slider rotates the left image
+  rotRange.addEventListener('input', function(){
     updateLeftRotation(this.value);
   });
 
-  btnCheck.addEventListener('click',function(){
-    if(attemptsLeft<=0) return;
-    attemptsLeft-=1;
-    attemptsCountEl.textContent=attemptsLeft;
-    attemptsMsg.textContent='Resultado: incorrecto.';
-    if(attemptsLeft<=0){
-      lockedOverlay.style.display='flex';
-      btnCheck.disabled=true;
-      rotRange.disabled=true;
+  // The "Comprobar" button: ALWAYS fails (but consumes attempts)
+  btnCheck.addEventListener('click', function(){
+    if(attemptsLeft <= 0) return;
+    attemptsLeft -= 1;
+    attemptsCountEl.textContent = attemptsLeft;
+    attemptsMsg.textContent = 'Resultado: incorrecto.';
+    // intentionally ignore real match: always wrong
+    if(attemptsLeft <= 0){
+      // lock puzzle: show locked overlay and disable controls
+      attemptsMsg.textContent = 'Has agotado los intentos. Verificación bloqueada.';
+      lockedOverlay.style.display = 'flex';
+      btnCheck.disabled = true;
+      rotRange.disabled = true;
     }
   });
 
-  cornerBL.addEventListener('click',function(){
-    if(secretSequence===0){ secretSequence=1; }else{ secretSequence=0; }
+  // Puzzle secret click sequence: BL then TR
+  cornerBL.addEventListener('click', function(){
+    // first click sets the sequence to expecting TR next
+    if(secretSequence === 0){
+      secretSequence = 1;
+      // small visual feedback: briefly change opacity
+      cornerBL.style.opacity = 0.8;
+      setTimeout(()=> cornerBL.style.opacity = 1, 220);
+    } else {
+      // reset if clicked out of order
+      secretSequence = 0;
+    }
   });
-  cornerTR.addEventListener('click',function(){
-    if(secretSequence===1){
-      puzzlePage.style.display='none';
-      loginBox.style.display='none';
-      videoPage.style.display='block';
-      const vid=document.getElementById('mainVideo');
-      vid.muted=false;
-      try{vid.play().catch(()=>{});}catch(e){}
-      secretSequence=0;
-    }else{ secretSequence=0; }
+
+  cornerTR.addEventListener('click', function(){
+    if(secretSequence === 1){
+      // correct sequence completed -> reveal video
+      puzzlePage.style.display = 'none';
+      puzzlePage.setAttribute('aria-hidden','true');
+      loginBox.style.display = 'none';
+      videoPage.style.display = 'block';
+      const vid = document.getElementById('mainVideo');
+      vid.muted = false;
+      try{ vid.play().catch(()=>{}); }catch(e){}
+      secretSequence = 0;
+    } else {
+      secretSequence = 0;
+    }
   });
+
+  // Keyboard convenience
+  passEl.addEventListener('keydown', function(ev){
+    if(ev.key === 'Enter') btnEnter.click();
+  });
+  userEl.addEventListener('keydown', function(ev){
+    if(ev.key === 'Enter') passEl.focus();
+  });
+
+  // Prevent selection on corner on touch devices
+  [cornerBL, cornerTR].forEach(el => {
+    el.addEventListener('touchstart', function(e){ e.preventDefault(); });
+  });
+
 })();
 </script>
 </body>
