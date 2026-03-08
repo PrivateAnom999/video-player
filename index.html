@@ -14,6 +14,191 @@
   --corner-size: var(--bg-size);
 }
 *{box-sizing:border-box}
+html,body{margin:0; height:100%; background:var(--bg); color:var(--text); font-family:Arial,sans-serif; overflow:hidden;}
+
+/* Pantalla 1: login centrado */
+.app {display:flex; justify-content:center; align-items:center; height:100vh; padding:20px;}
+.container{background:var(--panel); padding:26px; border-radius:12px; box-shadow:0 6px 30px rgba(0,0,0,0.6); max-width:420px; width:90%; text-align:center;}
+input{width:100%; padding:12px; margin:10px 0; border-radius:8px; border:none; font-size:16px;}
+button{width:100%; padding:12px; border:none; border-radius:8px; background:var(--accent); color:#fff; font-size:16px; cursor:pointer; margin-top:10px;}
+button:hover{filter:brightness(0.95);}
+.error-msg{color:#ff6b6b; font-size:14px; margin-top:2px; display:none;}
+
+/* Pantalla video */
+#videoPage{display:none; text-align:center; width:95%; max-width:1100px; margin:auto;}
+video{width:100%; max-height:80vh; border-radius:10px; background:black;}
+
+/* Pantalla puzzle */
+#puzzlePage{
+  display:none;
+  height:100vh;
+  width:100%;
+  position:relative;
+  background-image:
+    linear-gradient(90deg, #fff 50%, #000 50%),
+    linear-gradient(90deg, #000 50%, #fff 50%);
+  background-size: calc(var(--bg-size)*2) calc(var(--bg-size)*2);
+  background-position:0 0, var(--bg-size) 0;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between; /* repartir elementos verticalmente */
+  align-items:center;
+  padding:20px;
+  overflow:hidden;
+}
+
+/* Esquinas negras */
+.corner{position:absolute; width:var(--corner-size); height:var(--corner-size); background:black; z-index:5;}
+.corner.top-left{top:0; left:0; cursor:pointer;}
+.corner.top-right{top:0; right:0; cursor:pointer;}
+.corner.bottom-left{bottom:0; left:0; cursor:pointer;}
+.corner.bottom-right{bottom:0; right:0;}
+
+/* Texto y controles del puzzle */
+#puzzlePage h3{margin:0; text-align:center;}
+.images{display:flex; gap:18px; justify-content:center; align-items:center; flex-wrap:wrap; max-height:40vh; width:100%;}
+.img-box{width:clamp(120px,22vw,250px); height:clamp(120px,22vw,250px); background:#ddd; border-radius:8px; display:flex; justify-content:center; align-items:center; overflow:hidden;}
+.img-box svg{width:90%; height:90%;}
+#rightImg svg{transform:rotate(30deg); transition: transform .2s linear;}
+#leftSVG{transition: transform .1s linear;}
+.controls{width:90%; max-width:500px; text-align:center; color:#fff; max-height:25vh;}
+.controls input[type="range"]{width:100%; margin-top:8px;}
+.attempts{margin-top:8px; font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Pantalla 1: Login -->
+  <div id="loginBox" class="container">
+    <h2>Acceso privado</h2>
+    <input id="user" placeholder="Usuario" autocomplete="off" />
+    <div id="userError" class="error-msg">El usuario no puede estar vacio</div>
+    <input id="pass" type="password" placeholder="Contraseña" autocomplete="new-password" />
+    <div id="passError" class="error-msg">La contraseña no puede estar vacio</div>
+    <button id="btnEnter">Entrar</button>
+  </div>
+
+  <!-- Pantalla video -->
+  <div id="videoPage">
+    <h2>Video privado</h2>
+    <video id="mainVideo" controls controlsList="nodownload" preload="metadata">
+      <source src="video.mp4" type="video/mp4">
+      Tu navegador no soporta video.
+    </video>
+  </div>
+</div>
+
+<!-- Pantalla puzzle -->
+<div id="puzzlePage">
+  <!-- Esquinas -->
+  <div class="corner top-left" id="cornerTL"></div>
+  <div class="corner top-right" id="cornerTR"></div>
+  <div class="corner bottom-left" id="cornerBL"></div>
+  <div class="corner bottom-right"></div>
+
+  <div style="text-align:center;">
+    <h3>Verificación adicional requerida</h3>
+    <div>Coloca la imagen izquierda al mismo ángulo que la de la derecha. Tienes 3 intentos.</div>
+  </div>
+
+  <div class="images">
+    <div id="leftImg" class="img-box">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+        <g id="leftSVG" transform="rotate(0 50 50)">
+          <rect x="20" y="20" width="60" height="60" rx="8" ry="8" fill="#1e88e5"/>
+          <circle cx="50" cy="50" r="14" fill="#fff"/>
+        </g>
+      </svg>
+    </div>
+    <div id="rightImg" class="img-box">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+        <g>
+          <rect x="20" y="20" width="60" height="60" rx="8" ry="8" fill="#1e88e5"/>
+          <circle cx="50" cy="50" r="14" fill="#fff"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="controls">
+    <label for="rotRange">Ángulo de la imagen izquierda: <span id="angleLabel">0°</span></label>
+    <input id="rotRange" type="range" min="0" max="359" value="0" />
+    <div style="height:8px"></div>
+    <button id="btnCheck">Comprobar</button>
+    <div class="attempts" id="attemptsMsg"></div>
+    <div class="attempts small">Intentos restantes: <span id="attemptsCount">3</span></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const btnEnter=document.getElementById('btnEnter');
+  const userEl=document.getElementById('user');
+  const passEl=document.getElementById('pass');
+  const userError=document.getElementById('userError');
+  const passError=document.getElementById('passError');
+  const loginBox=document.getElementById('loginBox');
+  const puzzlePage=document.getElementById('puzzlePage');
+  const videoPage=document.getElementById('videoPage');
+  const leftSVG=document.getElementById('leftSVG');
+  const rotRange=document.getElementById('rotRange');
+  const angleLabel=document.getElementById('angleLabel');
+  const btnCheck=document.getElementById('btnCheck');
+  const attemptsMsg=document.getElementById('attemptsMsg');
+  const attemptsCountEl=document.getElementById('attemptsCount');
+  const cornerBL=document.getElementById('cornerBL');
+  const cornerTR=document.getElementById('cornerTR');
+  const mainVideo=document.getElementById('mainVideo');
+
+  let attemptsLeft=3;
+  let secretSequence=0;
+
+  function updateLeftRotation(deg){
+    leftSVG.setAttribute('transform','rotate('+deg+' 50 50)');
+    angleLabel.textContent=deg+'°';
+  }
+  updateLeftRotation(0);
+
+  // Login
+  btnEnter.addEventListener('click',function(){
+    const u=userEl.value.trim();
+    const p=passEl.value;
+    userError.style.display='none';
+    passError.style.display='none';
+    if(!u){ userError.style.display='block'; return; }
+    if(u!=='00si' && !p){ passError.style.display='block'; return; }
+    if(u==='00si' && p===''){ loginBox.style.display='none'; puzzlePage.style.display='flex'; attemptsLeft=3; attemptsCountEl.textContent=attemptsLeft; attemptsMsg.textContent=''; rotRange.value=0; updateLeftRotation(0); secretSequence=0; return; }
+    alert('Usuario o contraseña incorrectos');
+  });
+
+  // Rotación puzzle
+  rotRange.addEventListener('input',function(){updateLeftRotation(this.value);});
+  btnCheck.addEventListener('click',function(){if(attemptsLeft<=0)return; attemptsLeft--; attemptsCountEl.textContent=attemptsLeft; attemptsMsg.textContent='Resultado: incorrecto.'; if(attemptsLeft<=0){btnCheck.disabled=true; rotRange.disabled=true;}});
+
+  // Secuencia esquinas BL → TR para desbloquear video
+  cornerBL.addEventListener('click',function(){if(secretSequence===0)secretSequence=1; else secretSequence=0;});
+  cornerTR.addEventListener('click',function(){if(secretSequence===1){puzzlePage.style.display='none'; videoPage.style.display='block'; mainVideo.muted=false; try{mainVideo.play();}catch(e){} secretSequence=0;} else secretSequence=0;});
+})();
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Acceso privado</title>
+<style>
+:root{
+  --bg: #0f0f0f;
+  --panel: #1c1c1c;
+  --text: #fff;
+  --accent: #1e88e5;
+  --bg-size: clamp(36px,6vw,80px);
+  --corner-size: var(--bg-size);
+}
+*{box-sizing:border-box}
 html, body{margin:0; height:100%; background:var(--bg); color:var(--text); font-family:Arial,sans-serif;}
 
 /* Pantalla 1: login centrado */
@@ -181,3 +366,4 @@ video{width:100%; max-height:80vh; border-radius:10px; background:black;}
 </script>
 </body>
 </html>
+
