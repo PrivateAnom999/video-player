@@ -60,15 +60,13 @@ font-size:16px;
 }
 
 button{
-width:100%;
-padding:12px;
+padding:10px 14px;
 border:none;
 border-radius:8px;
 background:var(--accent);
 color:#fff;
-font-size:16px;
+font-size:15px;
 cursor:pointer;
-margin-top:10px;
 }
 
 .error-msg{
@@ -105,56 +103,34 @@ z-index:0;
 .black{background:black;}
 .white{background:white;}
 
-/* CUADRADOS ESQUINAS */
-
 .corner{
-
 position:absolute;
-
 width:var(--square-size);
 height:var(--square-size);
-
 background:black;
-
 z-index:20;
-
 }
-
-/* AREA TACTIL GRANDE */
 
 .corner::after{
-
 content:"";
-
 position:absolute;
-
 width:120px;
 height:120px;
-
 top:50%;
 left:50%;
-
 transform:translate(-50%,-50%);
-
 }
-
-/* POSICION */
 
 .top-left{top:0;left:0;}
 .top-right{top:0;right:0;}
 .bottom-left{bottom:0;left:0;}
 .bottom-right{bottom:0;right:0;}
 
-/* IMAGENES */
-
 .images{
 display:flex;
 gap:20px;
 margin-top:10px;
 z-index:2;
-align-items:center;
-justify-content:center;
-flex-wrap:wrap;
 }
 
 .img-box{
@@ -165,11 +141,6 @@ border-radius:8px;
 display:flex;
 justify-content:center;
 align-items:center;
-}
-
-.img-box svg{
-width:90%;
-height:90%;
 }
 
 #rightImg svg{transform:rotate(30deg);}
@@ -185,8 +156,6 @@ width:90%;
 
 .controls input{width:100%;}
 
-.attempts{margin-top:8px;}
-
 /* VIDEO */
 
 #videoPage{
@@ -195,44 +164,68 @@ flex-direction:column;
 justify-content:center;
 align-items:center;
 background:black;
+gap:20px;
 }
 
 .video-wrapper{
 display:flex;
 justify-content:center;
 align-items:center;
-height:90vh;
+height:70vh;
 width:100%;
 }
 
 video{
-height:90vh;
-max-height:900px;
+height:70vh;
 width:auto;
 border-radius:14px;
 box-shadow:0 0 40px rgba(0,0,0,0.8);
 background:black;
 }
 
-/* MOVIL */
+/* DESPLEGABLE */
 
-@media (max-width:700px){
-
-.img-box{
-width:130px;
-height:130px;
+.dropdown{
+width:90%;
+max-width:400px;
+background:#111;
+border-radius:10px;
+overflow:hidden;
 }
 
-.corner{
-width:70px;
-height:70px;
+.dropdown button.toggle{
+width:100%;
+background:#222;
+padding:12px;
+font-size:16px;
 }
 
-.corner::after{
-width:150px;
-height:150px;
+.dropdown-content{
+display:none;
+padding:15px;
+gap:10px;
+flex-direction:column;
 }
 
+.field{
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:#1b1b1b;
+padding:10px;
+border-radius:8px;
+gap:10px;
+}
+
+.field span{
+word-break:break-all;
+font-size:14px;
+}
+
+.copy-btn{
+background:#444;
+padding:6px 10px;
+font-size:13px;
 }
 
 </style>
@@ -276,7 +269,7 @@ height:150px;
 
 <div class="images">
 
-<div id="leftImg" class="img-box">
+<div class="img-box">
 
 <svg viewBox="0 0 100 100">
 <g id="leftSVG">
@@ -306,8 +299,6 @@ height:150px;
 
 <button id="btnCheck">Comprobar</button>
 
-<div class="attempts">Intentos restantes: <span id="attemptsCount">3</span></div>
-
 </div>
 
 </div>
@@ -325,6 +316,26 @@ height:150px;
 
 </div>
 
+<div class="dropdown">
+
+<button class="toggle" id="toggleInfo">Mostrar información</button>
+
+<div class="dropdown-content" id="dropdownContent">
+
+<div class="field">
+<span id="emailText">privateanomuser@outlook.com</span>
+<button class="copy-btn" onclick="copyText('emailText',this)">Copiar</button>
+</div>
+
+<div class="field">
+<span id="userText">useranom999</span>
+<button class="copy-btn" onclick="copyText('userText',this)">Copiar</button>
+</div>
+
+</div>
+
+</div>
+
 </div>
 
 
@@ -336,7 +347,6 @@ const videoPage=document.getElementById("videoPage")
 
 const user=document.getElementById("user")
 const pass=document.getElementById("pass")
-
 const btnEnter=document.getElementById("btnEnter")
 
 const rotRange=document.getElementById("rotRange")
@@ -430,6 +440,37 @@ videoPage.style.display="flex"
 }
 
 secret=0
+
+}
+
+/* DESPLEGABLE */
+
+const toggle=document.getElementById("toggleInfo")
+const content=document.getElementById("dropdownContent")
+
+toggle.onclick=function(){
+
+if(content.style.display==="flex"){
+content.style.display="none"
+}else{
+content.style.display="flex"
+}
+
+}
+
+/* COPIAR */
+
+function copyText(id,btn){
+
+const text=document.getElementById(id).innerText
+
+navigator.clipboard.writeText(text)
+
+btn.innerText="Copiado"
+
+setTimeout(()=>{
+btn.innerText="Copiar"
+},2000)
 
 }
 
