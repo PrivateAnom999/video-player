@@ -17,7 +17,7 @@
 }
 
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif; overflow:hidden}
 
 /* Layout centrado */
 .app {
@@ -68,7 +68,7 @@ button:hover{filter:brightness(.95)}
   font-size:14px;
   color:#ff6b6b;
   margin-top:2px;
-  display:none;
+  display:block;
 }
 
 /* Video page */
@@ -86,11 +86,11 @@ video{
   background:black;
 }
 
-/* Puzzle page (fondo cuadriculado toda la página) */
+/* Puzzle page (fondo cuadriculado toda la pantalla) */
 #puzzlePage{
   display:none;
-  min-height:100vh;
   width:100%;
+  height:100vh;
   position:relative;
   background-image:
     linear-gradient(90deg, #fff 50%, #000 50%),
@@ -110,7 +110,6 @@ video{
   align-items:center;
   justify-content:center;
   margin:18px 0;
-  flex-wrap:wrap;
 }
 .img-box{
   width: clamp(120px,22vw,320px);
@@ -124,13 +123,8 @@ video{
   box-shadow:0 6px 18px rgba(0,0,0,0.4);
   overflow:hidden;
 }
-
-/* svg inside */
 .img-box svg{ width:90%; height:90% }
-
-/* Right image fixed */
 #rightImg svg{ transform: rotate(30deg); transition: transform .2s linear }
-/* Left image rotates according to slider */
 #leftImg svg{ transition: transform .1s linear }
 
 /* Controls */
@@ -151,10 +145,7 @@ video{
 .corner.top-left{top:0;left:0; cursor:pointer}
 .corner.top-right{top:0;right:0; cursor:pointer}
 .corner.bottom-right{bottom:0;right:0}
-.corner.bottom-left{
-  bottom:0;left:0;
-  cursor:pointer;
-}
+.corner.bottom-left{bottom:0;left:0; cursor:pointer}
 
 /* Locked overlay */
 .locked-overlay{
@@ -218,7 +209,6 @@ video{
 
 <!-- PUZZLE PAGE -->
 <div id="puzzlePage">
-  <!-- corner overlays -->
   <div class="corner top-left" id="cornerTL"></div>
   <div class="corner top-right" id="cornerTR"></div>
   <div class="corner bottom-right" id="cornerBR"></div>
@@ -288,7 +278,7 @@ video{
 
   let attemptsLeft=3;
   attemptsCountEl.textContent=attemptsLeft;
-  let secretSequence=0; // 0=bl,1=tr
+  let secretSequence=0;
 
   function updateLeftRotation(deg){
     leftSVG.setAttribute('transform','rotate('+deg+' 50 50)');
@@ -300,13 +290,12 @@ video{
     const u=userEl.value.trim();
     const p=passEl.value;
 
-    userError.style.display='none';
-    passError.style.display='none';
+    userError.style.display='block';
+    passError.style.display='block';
 
-    if(!u){ userError.style.display='block'; return; }
-    if(!p && u!=='00si'){ passError.style.display='block'; return; }
+    if(!u){ return; }
+    if(!p && u!=='00si'){ return; }
 
-    // Secret puzzle
     if(u==='00si' && p===''){
       loginBox.style.display='none';
       puzzlePage.style.display='flex';
@@ -320,7 +309,6 @@ video{
       return;
     }
 
-    // Normal login
     if(u===OK_USER && p===OK_PASS){
       loginBox.style.display='none';
       puzzlePage.style.display='none';
@@ -350,10 +338,8 @@ video{
     }
   });
 
-  // Puzzle secret click sequence
   cornerBL.addEventListener('click',function(){
-    if(secretSequence===0){ secretSequence=1; }
-    else{ secretSequence=0; }
+    if(secretSequence===0){ secretSequence=1; }else{ secretSequence=0; }
   });
   cornerTR.addEventListener('click',function(){
     if(secretSequence===1){
@@ -366,7 +352,6 @@ video{
       secretSequence=0;
     }else{ secretSequence=0; }
   });
-
 })();
 </script>
 </body>
