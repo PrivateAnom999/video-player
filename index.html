@@ -105,18 +105,47 @@ z-index:0;
 .black{background:black;}
 .white{background:white;}
 
+/* CUADRADOS ESQUINAS */
+
 .corner{
+
 position:absolute;
+
 width:var(--square-size);
 height:var(--square-size);
+
 background:black;
-z-index:5;
+
+z-index:20;
+
 }
+
+/* AREA TACTIL GRANDE */
+
+.corner::after{
+
+content:"";
+
+position:absolute;
+
+width:120px;
+height:120px;
+
+top:50%;
+left:50%;
+
+transform:translate(-50%,-50%);
+
+}
+
+/* POSICION */
 
 .top-left{top:0;left:0;}
 .top-right{top:0;right:0;}
 .bottom-left{bottom:0;left:0;}
 .bottom-right{bottom:0;right:0;}
+
+/* IMAGENES */
 
 .images{
 display:flex;
@@ -154,9 +183,7 @@ max-width:400px;
 width:90%;
 }
 
-.controls input{
-width:100%;
-}
+.controls input{width:100%;}
 
 .attempts{margin-top:8px;}
 
@@ -168,7 +195,6 @@ flex-direction:column;
 justify-content:center;
 align-items:center;
 background:black;
-gap:20px;
 }
 
 .video-wrapper{
@@ -184,13 +210,11 @@ height:90vh;
 max-height:900px;
 width:auto;
 border-radius:14px;
-box-shadow:
-0 0 40px rgba(0,0,0,0.8),
-0 0 120px rgba(0,0,0,0.9);
+box-shadow:0 0 40px rgba(0,0,0,0.8);
 background:black;
 }
 
-/* ====== ADAPTACION MOVIL ====== */
+/* MOVIL */
 
 @media (max-width:700px){
 
@@ -199,40 +223,14 @@ width:130px;
 height:130px;
 }
 
-.images{
-flex-direction:row;
-gap:12px;
-}
-
-.controls{
-font-size:14px;
-}
-
-button{
-font-size:15px;
-padding:11px;
-}
-
-#puzzlePage h3{
-font-size:18px;
-}
-
 .corner{
-width:50px;
-height:50px;
+width:70px;
+height:70px;
 }
 
-}
-
-@media (max-width:420px){
-
-.img-box{
-width:110px;
-height:110px;
-}
-
-.controls{
-font-size:13px;
+.corner::after{
+width:150px;
+height:150px;
 }
 
 }
@@ -345,14 +343,11 @@ const rotRange=document.getElementById("rotRange")
 const leftSVG=document.getElementById("leftSVG")
 const angleLabel=document.getElementById("angleLabel")
 
-const attemptsCount=document.getElementById("attemptsCount")
-
 const cornerBL=document.getElementById("cornerBL")
 const cornerTR=document.getElementById("cornerTR")
 
 const bgGrid=document.getElementById("bgGrid")
 
-let attempts=3
 let secret=0
 
 /* FONDO */
