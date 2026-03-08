@@ -63,6 +63,14 @@ button{
 }
 button:hover{filter:brightness(.95)}
 
+/* Error messages under login inputs */
+.error-msg{
+  font-size:14px;
+  color:#ff6b6b;
+  margin-top:2px;
+  display:none;
+}
+
 /* Video page */
 #videoPage{
   display:none;
@@ -78,50 +86,21 @@ video{
   background:black;
 }
 
-/* Puzzle page */
+/* Puzzle page (fondo cuadriculado toda la página) */
 #puzzlePage{
   display:none;
+  min-height:100vh;
   width:100%;
-  max-width:var(--video-max);
-  margin:0 auto;
-  text-align:center;
   position:relative;
-  padding:16px;
-  border-radius:10px;
-}
-
-/* Checkerboard background: uses two layered gradients to build squares */
-.puzzle-area{
-  position:relative;
-  padding:16px;
-  border-radius:10px;
   background-image:
     linear-gradient(90deg, #fff 50%, #000 50%),
     linear-gradient(90deg, #000 50%, #fff 50%);
   background-size: calc(var(--bg-size) * 2) calc(var(--bg-size) * 2);
   background-position: 0 0, var(--bg-size) 0;
-  overflow:hidden;
   display:flex;
   flex-direction:column;
   align-items:center;
-}
-
-/* Ensure corners are black with overlay squares */
-.corner {
-  position:absolute;
-  width:var(--corner-size);
-  height:var(--corner-size);
-  background:black;
-  z-index:5;
-}
-.corner.top-left{top:0;left:0}
-.corner.top-right{top:0;right:0}
-.corner.bottom-right{bottom:0;right:0}
-/* bottom-left is the secret clickable corner */
-.corner.bottom-left{
-  bottom:0;left:0;
-  cursor:pointer;
-  outline: 2px solid rgba(255,255,255,0.06);
+  justify-content:center;
 }
 
 /* Images area */
@@ -149,9 +128,8 @@ video{
 /* svg inside */
 .img-box svg{ width:90%; height:90% }
 
-/* Right image is a reference rotated at fixed angle */
+/* Right image fixed */
 #rightImg svg{ transform: rotate(30deg); transition: transform .2s linear }
-
 /* Left image rotates according to slider */
 #leftImg svg{ transition: transform .1s linear }
 
@@ -161,6 +139,22 @@ video{
 
 /* Attempt message */
 .attempts{ margin-top:8px; font-weight:600 }
+
+/* Corner overlays for puzzle */
+.corner {
+  position:absolute;
+  width:var(--corner-size);
+  height:var(--corner-size);
+  background:black;
+  z-index:5;
+}
+.corner.top-left{top:0;left:0; cursor:pointer}
+.corner.top-right{top:0;right:0; cursor:pointer}
+.corner.bottom-right{bottom:0;right:0}
+.corner.bottom-left{
+  bottom:0;left:0;
+  cursor:pointer;
+}
 
 /* Locked overlay */
 .locked-overlay{
@@ -181,7 +175,6 @@ video{
 .small{ font-size:14px; color:#ddd }
 .hint{ font-size:13px; color:#cfcfcf; margin-top:6px }
 
-/* Responsive adjustments for wide screens: show container & puzzle side-by-side with video */
 @media(min-width:1000px){
   .app{padding:40px}
   .layout-row{
@@ -203,11 +196,11 @@ video{
     <!-- LOGIN -->
     <div id="loginBox" class="container" aria-live="polite">
       <h2 style="margin:0 0 10px 0">Acceso privado</h2>
-      <div class="small">Introduce tus credenciales</div>
       <input id="user" placeholder="Usuario" autocomplete="off" />
+      <div id="userError" class="error-msg">El usuario no puede estar vacio</div>
       <input id="pass" type="password" placeholder="Contraseña" autocomplete="new-password" />
+      <div id="passError" class="error-msg">La contraseña no puede estar vacio</div>
       <button id="btnEnter">Entrar</button>
-      <div class="hint">Si quieres intentar una entrada secreta: prueba poner <strong>00si</strong> como usuario y dejar la contraseña vacía.</div>
     </div>
 
     <!-- VIDEO (oculto inicialmente) -->
@@ -223,176 +216,156 @@ video{
   </div>
 </div>
 
-<!-- PUZZLE PAGE (modal-like area under same layout) -->
-<div id="puzzlePage" style="display:none;margin:18px auto;max-width:var(--video-max)">
-  <div class="puzzle-area" style="border-radius:10px;padding:20px;">
-    <!-- corner overlays -->
-    <div class="corner top-left"></div>
-    <div class="corner top-right"></div>
-    <div class="corner bottom-right"></div>
-    <div id="secretCorner" class="corner bottom-left" title="Área secreta (clic)"></div>
+<!-- PUZZLE PAGE -->
+<div id="puzzlePage">
+  <!-- corner overlays -->
+  <div class="corner top-left" id="cornerTL"></div>
+  <div class="corner top-right" id="cornerTR"></div>
+  <div class="corner bottom-right" id="cornerBR"></div>
+  <div id="cornerBL" class="corner bottom-left"></div>
 
-    <h3 style="margin:6px 0 0 0">Verificación adicional requerida</h3>
-    <div class="small">Coloca la imagen izquierda al mismo ángulo que la de la derecha. Tienes <span id="attemptsCount">3</span> intentos.</div>
+  <h3>Verificación adicional requerida</h3>
+  <div class="small">Coloca la imagen izquierda al mismo ángulo que la de la derecha. Tienes 3 intentos.</div>
 
-    <div class="images" aria-hidden="false">
-      <div id="leftImg" class="img-box" title="Gira esta imagen">
-        <!-- ejemplo SVG: rombo o figura simple -->
-        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
-          <g id="leftSVG" transform="rotate(0 50 50)">
-            <rect x="20" y="20" width="60" height="60" rx="8" ry="8" fill="#1e88e5"/>
-            <circle cx="50" cy="50" r="14" fill="#fff"/>
-          </g>
-        </svg>
-      </div>
-
-      <div id="rightImg" class="img-box" title="Referencia (fija)">
-        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
-          <g>
-            <rect x="20" y="20" width="60" height="60" rx="8" ry="8" fill="#1e88e5"/>
-            <circle cx="50" cy="50" r="14" fill="#fff"/>
-          </g>
-        </svg>
-      </div>
+  <div class="images" aria-hidden="false">
+    <div id="leftImg" class="img-box">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+        <g id="leftSVG" transform="rotate(0 50 50)">
+          <rect x="20" y="20" width="60" height="60" rx="8" ry="8" fill="#1e88e5"/>
+          <circle cx="50" cy="50" r="14" fill="#fff"/>
+        </g>
+      </svg>
     </div>
 
-    <div class="controls">
-      <label for="rotRange">Ángulo de la imagen izquierda: <span id="angleLabel">0°</span></label>
-      <input id="rotRange" type="range" min="0" max="359" value="0" />
-      <div style="height:8px"></div>
-      <button id="btnCheck">Comprobar</button>
-      <div class="attempts" id="attemptsMsg"></div>
+    <div id="rightImg" class="img-box">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+        <g>
+          <rect x="20" y="20" width="60" height="60" rx="8" ry="8" fill="#1e88e5"/>
+          <circle cx="50" cy="50" r="14" fill="#fff"/>
+        </g>
+      </svg>
     </div>
+  </div>
+
+  <div class="controls">
+    <label for="rotRange">Ángulo de la imagen izquierda: <span id="angleLabel">0°</span></label>
+    <input id="rotRange" type="range" min="0" max="359" value="0" />
+    <div style="height:8px"></div>
+    <button id="btnCheck">Comprobar</button>
+    <div class="attempts" id="attemptsMsg"></div>
+    <div class="attempts small">Intentos restantes: <span id="attemptsCount">3</span></div>
   </div>
 </div>
 
-<!-- Locked overlay template -->
 <div id="lockedOverlay" class="locked-overlay" style="display:none">
   <div>
     <div style="font-size:20px; font-weight:700">Acceso bloqueado</div>
-    <div style="margin-top:8px">Has agotado los intentos. El sistema ha bloqueado la verificación.</div>
+    <div style="margin-top:8px">Has agotado los intentos.</div>
   </div>
 </div>
 
 <script>
 (function(){
-  // Credenciales "normales"
-  const OK_USER = "qp";
-  const OK_PASS = "9q9q9p";
+  const OK_USER="qp",OK_PASS="9q9q9p";
+  const userEl=document.getElementById('user');
+  const passEl=document.getElementById('pass');
+  const btnEnter=document.getElementById('btnEnter');
+  const loginBox=document.getElementById('loginBox');
+  const videoPage=document.getElementById('videoPage');
+  const puzzlePage=document.getElementById('puzzlePage');
+  const btnCheck=document.getElementById('btnCheck');
+  const rotRange=document.getElementById('rotRange');
+  const angleLabel=document.getElementById('angleLabel');
+  const leftSVG=document.getElementById('leftSVG');
+  const attemptsCountEl=document.getElementById('attemptsCount');
+  const attemptsMsg=document.getElementById('attemptsMsg');
+  const cornerBL=document.getElementById('cornerBL');
+  const cornerTL=document.getElementById('cornerTL');
+  const cornerTR=document.getElementById('cornerTR');
+  const lockedOverlay=document.getElementById('lockedOverlay');
+  const userError=document.getElementById('userError');
+  const passError=document.getElementById('passError');
 
-  // Elements
-  const userEl = document.getElementById('user');
-  const passEl = document.getElementById('pass');
-  const btnEnter = document.getElementById('btnEnter');
-  const loginBox = document.getElementById('loginBox');
-  const videoPage = document.getElementById('videoPage');
-  const puzzlePage = document.getElementById('puzzlePage');
-  const btnCheck = document.getElementById('btnCheck');
-  const rotRange = document.getElementById('rotRange');
-  const angleLabel = document.getElementById('angleLabel');
-  const leftSVG = document.querySelector('#leftSVG');
-  const attemptsCountEl = document.getElementById('attemptsCount');
-  const attemptsMsg = document.getElementById('attemptsMsg');
-  const secretCorner = document.getElementById('secretCorner');
-  const lockedOverlay = document.getElementById('lockedOverlay');
+  let attemptsLeft=3;
+  attemptsCountEl.textContent=attemptsLeft;
+  let secretSequence=0; // 0=bl,1=tr
 
-  // Puzzle state
-  let attemptsLeft = 3;
-  attemptsCountEl.textContent = attemptsLeft;
-  attemptsMsg.textContent = '';
-
-  // Update rotation visually
   function updateLeftRotation(deg){
-    // apply rotation on the group transform
-    leftSVG.setAttribute('transform', 'rotate(' + deg + ' 50 50)');
-    angleLabel.textContent = deg + '°';
+    leftSVG.setAttribute('transform','rotate('+deg+' 50 50)');
+    angleLabel.textContent=deg+'°';
   }
   updateLeftRotation(0);
 
-  // Main login button behavior
-  btnEnter.addEventListener('click', function(){
-    const u = userEl.value.trim();
-    const p = passEl.value;
+  btnEnter.addEventListener('click',function(){
+    const u=userEl.value.trim();
+    const p=passEl.value;
 
-    // Secret path: user == '00si' and password empty -> puzzle
-    if(u === '00si' && p === ''){
-      // hide login, show puzzle
-      loginBox.style.display = 'none';
-      puzzlePage.style.display = 'block';
-      attemptsLeft = 3;
-      attemptsCountEl.textContent = attemptsLeft;
-      attemptsMsg.textContent = '';
-      rotRange.value = 0;
+    userError.style.display='none';
+    passError.style.display='none';
+
+    if(!u){ userError.style.display='block'; return; }
+    if(!p && u!=='00si'){ passError.style.display='block'; return; }
+
+    // Secret puzzle
+    if(u==='00si' && p===''){
+      loginBox.style.display='none';
+      puzzlePage.style.display='flex';
+      attemptsLeft=3;
+      attemptsCountEl.textContent=attemptsLeft;
+      attemptsMsg.textContent='';
+      rotRange.value=0;
       updateLeftRotation(0);
-      // ensure overlays hidden
-      lockedOverlay.style.display = 'none';
+      lockedOverlay.style.display='none';
+      secretSequence=0;
       return;
     }
 
-    // Normal valid credential
-    if(u === OK_USER && p === OK_PASS){
-      loginBox.style.display = 'none';
-      puzzlePage.style.display = 'none';
-      videoPage.style.display = 'block';
-      // try to autoplay muted (some browsers allow)
-      const vid = document.getElementById('mainVideo');
-      vid.muted = false;
-      try{ vid.play().catch(()=>{}); }catch(e){}
+    // Normal login
+    if(u===OK_USER && p===OK_PASS){
+      loginBox.style.display='none';
+      puzzlePage.style.display='none';
+      videoPage.style.display='block';
+      const vid=document.getElementById('mainVideo');
+      vid.muted=false;
+      try{vid.play().catch(()=>{});}catch(e){}
       return;
     }
 
     alert('Usuario o contraseña incorrectos');
   });
 
-  // Range slider rotates the left image
-  rotRange.addEventListener('input', function(){
-    const deg = parseInt(this.value,10);
-    updateLeftRotation(deg);
+  rotRange.addEventListener('input',function(){
+    updateLeftRotation(this.value);
   });
 
-  // The "Comprobar" button: ALWAYS fails (but consumes attempts)
-  btnCheck.addEventListener('click', function(){
-    if(attemptsLeft <= 0) return;
-    attemptsLeft -= 1;
-    attemptsCountEl.textContent = attemptsLeft;
-    attemptsMsg.textContent = 'Resultado: incorrecto. Inténtalo de nuevo.';
-    // intentionally ignore real match: always wrong
-    if(attemptsLeft <= 0){
-      // lock puzzle: show locked overlay and disable controls
-      attemptsMsg.textContent = 'Has agotado los intentos. Verificación bloqueada.';
-      // show overlay
-      lockedOverlay.style.display = 'flex';
-      // disable controls
-      btnCheck.disabled = true;
-      rotRange.disabled = true;
+  btnCheck.addEventListener('click',function(){
+    if(attemptsLeft<=0) return;
+    attemptsLeft-=1;
+    attemptsCountEl.textContent=attemptsLeft;
+    attemptsMsg.textContent='Resultado: incorrecto.';
+    if(attemptsLeft<=0){
+      lockedOverlay.style.display='flex';
+      btnCheck.disabled=true;
+      rotRange.disabled=true;
     }
   });
 
-  // Secret corner click -> reveal video
-  secretCorner.addEventListener('click', function(e){
-    // Reveal video page
-    puzzlePage.style.display = 'none';
-    loginBox.style.display = 'none';
-    videoPage.style.display = 'block';
-    // try to autoplay
-    const vid = document.getElementById('mainVideo');
-    vid.muted = false;
-    try{ vid.play().catch(()=>{}); }catch(e){}
+  // Puzzle secret click sequence
+  cornerBL.addEventListener('click',function(){
+    if(secretSequence===0){ secretSequence=1; }
+    else{ secretSequence=0; }
   });
-
-  // Also allow pressing Enter on password field to trigger login
-  passEl.addEventListener('keydown', function(ev){
-    if(ev.key === 'Enter') btnEnter.click();
+  cornerTR.addEventListener('click',function(){
+    if(secretSequence===1){
+      puzzlePage.style.display='none';
+      loginBox.style.display='none';
+      videoPage.style.display='block';
+      const vid=document.getElementById('mainVideo');
+      vid.muted=false;
+      try{vid.play().catch(()=>{});}catch(e){}
+      secretSequence=0;
+    }else{ secretSequence=0; }
   });
-  userEl.addEventListener('keydown', function(ev){
-    if(ev.key === 'Enter') {
-      // if user pressed Enter in username, focus password
-      passEl.focus();
-    }
-  });
-
-  // Prevent long-press selection on the secret corner on mobile (UX nicety)
-  secretCorner.addEventListener('touchstart', function(e){ e.preventDefault() });
 
 })();
 </script>
