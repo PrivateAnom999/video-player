@@ -72,8 +72,37 @@ cursor:pointer;
 .error-msg{
 color:#ff6b6b;
 font-size:14px;
-margin-top:2px;
 display:none;
+}
+
+/* PANTALLA CARGA */
+
+#loadingPage{
+background:#000;
+display:flex;
+flex-direction:column;
+gap:20px;
+}
+
+.loader{
+
+width:60px;
+height:60px;
+
+border:6px solid #333;
+border-top:6px solid #1e88e5;
+
+border-radius:50%;
+
+animation:spin 1s linear infinite;
+
+}
+
+@keyframes spin{
+
+0%{transform:rotate(0deg);}
+100%{transform:rotate(360deg);}
+
 }
 
 /* PUZZLE */
@@ -114,8 +143,8 @@ z-index:20;
 .corner::after{
 content:"";
 position:absolute;
-width:120px;
-height:120px;
+width:140px;
+height:140px;
 top:50%;
 left:50%;
 transform:translate(-50%,-50%);
@@ -241,15 +270,22 @@ font-size:13px;
 
 <h2>Acceso privado</h2>
 
-<input id="user" placeholder="Usuario">
-<div id="userError" class="error-msg">El usuario no puede estar vacio</div>
-
-<input id="pass" type="password" placeholder="Contraseña">
-<div id="passError" class="error-msg">La contraseña no puede estar vacio</div>
+<input id="user" placeholder="Usuario" autocomplete="off">
+<input id="pass" type="password" placeholder="Contraseña" autocomplete="new-password">
 
 <button id="btnEnter">Entrar</button>
 
 </div>
+
+</div>
+
+
+<!-- PANTALLA CARGA -->
+
+<div id="loadingPage" class="screen">
+
+<div class="loader"></div>
+<div>Verificando credenciales...</div>
 
 </div>
 
@@ -310,7 +346,7 @@ font-size:13px;
 
 <div class="video-wrapper">
 
-<video id="mainVideo" controls controlsList="nodownload">
+<video controls controlsList="nodownload">
 <source src="video.mp4" type="video/mp4">
 </video>
 
@@ -342,121 +378,67 @@ font-size:13px;
 <script>
 
 const loginBox=document.getElementById("loginBox")
+const loadingPage=document.getElementById("loadingPage")
 const puzzlePage=document.getElementById("puzzlePage")
-const videoPage=document.getElementById("videoPage")
 
 const user=document.getElementById("user")
 const pass=document.getElementById("pass")
+
 const btnEnter=document.getElementById("btnEnter")
 
-const rotRange=document.getElementById("rotRange")
-const leftSVG=document.getElementById("leftSVG")
-const angleLabel=document.getElementById("angleLabel")
-
-const cornerBL=document.getElementById("cornerBL")
-const cornerTR=document.getElementById("cornerTR")
-
-const bgGrid=document.getElementById("bgGrid")
-
-let secret=0
-
-/* FONDO */
-
-function generateGrid(){
-
-const size=60
-const cols=Math.ceil(window.innerWidth/size)
-const rows=Math.ceil(window.innerHeight/size)
-
-bgGrid.style.gridTemplateColumns=`repeat(${cols},1fr)`
-bgGrid.style.gridTemplateRows=`repeat(${rows},1fr)`
-
-bgGrid.innerHTML=""
-
-for(let y=0;y<rows;y++){
-for(let x=0;x<cols;x++){
-
-const div=document.createElement("div")
-
-if((x+y)%2==0) div.className="square black"
-else div.className="square white"
-
-bgGrid.appendChild(div)
-
-}
-}
-
-}
-
-generateGrid()
-window.addEventListener("resize",generateGrid)
-
 /* LOGIN */
+
+function resetLogin(){
+
+user.value=""
+pass.value=""
+
+loginBox.style.display="flex"
+
+}
+
+/* INTENTAR LOGIN */
 
 function tryLogin(){
 
 const u=user.value.trim()
 const p=pass.value
 
+/* usuario trampa */
+
+if(u==="admin" && p==="1234"){
+
+loginBox.style.display="none"
+loadingPage.style.display="flex"
+
+setTimeout(()=>{
+
+loadingPage.style.display="none"
+resetLogin()
+
+},20000)
+
+return
+}
+
+/* acceso normal */
+
 if(u==="00si" && p===""){
 
 loginBox.style.display="none"
 puzzlePage.style.display="flex"
 
+return
 }
 
 }
+
+/* eventos */
 
 btnEnter.onclick=tryLogin
 
 user.addEventListener("keydown",e=>{if(e.key==="Enter")tryLogin()})
 pass.addEventListener("keydown",e=>{if(e.key==="Enter")tryLogin()})
-
-/* ROTACION */
-
-rotRange.oninput=function(){
-
-leftSVG.setAttribute("transform","rotate("+this.value+" 50 50)")
-angleLabel.textContent=this.value+"°"
-
-}
-
-/* SECRETO */
-
-cornerBL.onclick=function(){
-
-if(secret===0)secret=1
-else secret=0
-
-}
-
-cornerTR.onclick=function(){
-
-if(secret===1){
-
-puzzlePage.style.display="none"
-videoPage.style.display="flex"
-
-}
-
-secret=0
-
-}
-
-/* DESPLEGABLE */
-
-const toggle=document.getElementById("toggleInfo")
-const content=document.getElementById("dropdownContent")
-
-toggle.onclick=function(){
-
-if(content.style.display==="flex"){
-content.style.display="none"
-}else{
-content.style.display="flex"
-}
-
-}
 
 /* COPIAR */
 
@@ -468,9 +450,26 @@ navigator.clipboard.writeText(text)
 
 btn.innerText="Copiado"
 
-setTimeout(()=>{
-btn.innerText="Copiar"
-},2000)
+setTimeout(()=>{btn.innerText="Copiar"},2000)
+
+}
+
+/* desplegable */
+
+const toggle=document.getElementById("toggleInfo")
+const content=document.getElementById("dropdownContent")
+
+if(toggle){
+
+toggle.onclick=function(){
+
+if(content.style.display==="flex"){
+content.style.display="none"
+}else{
+content.style.display="flex"
+}
+
+}
 
 }
 
