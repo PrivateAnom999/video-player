@@ -18,7 +18,7 @@
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;overflow:hidden}
 
-/* Centrar todo vertical y horizontal */
+/* Primera pantalla centrada */
 .app {height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;}
 
 /* Login box */
@@ -35,17 +35,24 @@ button:hover{filter:brightness(.95);}
 #videoPage{display:none; width:95%; max-width:var(--video-max); text-align:center;}
 video{width:100%; border-radius:10px; margin-top:14px; max-height:80vh; background:black;}
 
-/* Puzzle page – cubrir toda ventana sin scroll */
+/* Puzzle page – tablero de ajedrez y todo visible */
 #puzzlePage{
-  display:none; min-height:100vh; width:100%;
-  position:relative; background-image:
+  display:none;
+  min-height:100vh;
+  width:100%;
+  position:relative;
+  background-image:
     linear-gradient(90deg, #fff 50%, #000 50%),
     linear-gradient(90deg, #000 50%, #fff 50%);
   background-size: calc(var(--bg-size)*2) calc(var(--bg-size)*2);
   background-position:0 0, var(--bg-size) 0;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start; /* todo desde arriba */
   padding:20px;
-  overflow:hidden;
+  overflow:auto; /* solo scroll si ventana muy pequeña */
 }
 
 /* Esquinas negras */
@@ -56,14 +63,14 @@ video{width:100%; border-radius:10px; margin-top:14px; max-height:80vh; backgrou
 .corner.bottom-right{bottom:0; right:0;}
 
 /* Images area */
-.images{display:flex; gap:18px; align-items:center; justify-content:center; flex-wrap:wrap;}
+.images{display:flex; gap:18px; align-items:center; justify-content:center; flex-wrap:wrap; max-height:50vh;}
 .img-box{width:clamp(120px,22vw,320px); height:clamp(120px,22vw,320px); background:#ddd; border-radius:8px; display:flex; align-items:center; justify-content:center; position:relative; box-shadow:0 6px 18px rgba(0,0,0,0.4); overflow:hidden;}
 .img-box svg{width:90%; height:90%;}
 #rightImg svg{transform: rotate(30deg); transition: transform .2s linear;}
 #leftImg svg{transition: transform .1s linear;}
 
 /* Controls */
-.controls{width:90%; max-width:700px; text-align:center; margin-top:12px; color:#fff;}
+.controls{width:90%; max-width:700px; text-align:center; margin-top:12px; color:#fff; max-height:30vh;}
 .controls input[type="range"]{width:100%; margin-top:8px;}
 .attempts{margin-top:8px; font-weight:600;}
 </style>
