@@ -6,6 +6,7 @@
 <title>Acceso privado</title>
 
 <style>
+
 :root{
 --bg:#0f0f0f;
 --panel:#1c1c1c;
@@ -86,6 +87,8 @@ display:flex;
 flex-direction:column;
 justify-content:center;
 align-items:center;
+text-align:center;
+gap:10px;
 }
 
 #bgGrid{
@@ -118,13 +121,16 @@ z-index:5;
 .images{
 display:flex;
 gap:20px;
-margin-top:20px;
+margin-top:10px;
 z-index:2;
+align-items:center;
+justify-content:center;
+flex-wrap:wrap;
 }
 
 .img-box{
-width:200px;
-height:200px;
+width:180px;
+height:180px;
 background:#ddd;
 border-radius:8px;
 display:flex;
@@ -132,20 +138,29 @@ justify-content:center;
 align-items:center;
 }
 
+.img-box svg{
+width:90%;
+height:90%;
+}
+
 #rightImg svg{transform:rotate(30deg);}
 #leftSVG{transition:transform .1s linear;}
 
 .controls{
-margin-top:20px;
+margin-top:10px;
 z-index:2;
 text-align:center;
+max-width:400px;
+width:90%;
 }
 
-.controls input{width:300px;}
+.controls input{
+width:100%;
+}
 
 .attempts{margin-top:8px;}
 
-/* VIDEO (MEJORADO PARA VIDEO VERTICAL) */
+/* VIDEO */
 
 #videoPage{
 display:flex;
@@ -157,38 +172,68 @@ gap:20px;
 }
 
 .video-wrapper{
-
 display:flex;
 justify-content:center;
 align-items:center;
-
 height:90vh;
 width:100%;
-
 }
 
 video{
-
 height:90vh;
 max-height:900px;
-
 width:auto;
-
 border-radius:14px;
-
 box-shadow:
 0 0 40px rgba(0,0,0,0.8),
 0 0 120px rgba(0,0,0,0.9);
-
 background:black;
+}
+
+/* ====== ADAPTACION MOVIL ====== */
+
+@media (max-width:700px){
+
+.img-box{
+width:130px;
+height:130px;
+}
+
+.images{
+flex-direction:row;
+gap:12px;
+}
+
+.controls{
+font-size:14px;
+}
+
+button{
+font-size:15px;
+padding:11px;
+}
+
+#puzzlePage h3{
+font-size:18px;
+}
+
+.corner{
+width:50px;
+height:50px;
+}
 
 }
 
-.video-title{
+@media (max-width:420px){
 
-font-size:22px;
-letter-spacing:1px;
-opacity:0.9;
+.img-box{
+width:110px;
+height:110px;
+}
+
+.controls{
+font-size:13px;
+}
 
 }
 
@@ -257,10 +302,9 @@ opacity:0.9;
 
 <div class="controls">
 
-<label>Ángulo: <span id="angleLabel">0°</span></label><br>
-<input id="rotRange" type="range" min="0" max="359" value="0">
+<label>Ángulo: <span id="angleLabel">0°</span></label>
 
-<br><br>
+<input id="rotRange" type="range" min="0" max="359" value="0">
 
 <button id="btnCheck">Comprobar</button>
 
@@ -274,8 +318,6 @@ opacity:0.9;
 <!-- VIDEO -->
 
 <div id="videoPage" class="screen">
-
-<div class="video-title">Video privado</div>
 
 <div class="video-wrapper">
 
